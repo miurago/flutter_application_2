@@ -1,115 +1,289 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+import 'dart:math';
 
-void main() {
-  runApp(const MyApp());
-}
+import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
+
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Clock',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Flutter Clock'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  Timer _timer;
+  final PublishSubject<DateTime> _subject = PublishSubject<DateTime>();
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+
+    _subject.sink.add(DateTime.now());
+
+    _timer = Timer.periodic(
+      Duration(milliseconds: 1000),
+      (time) {
+        setState(() => _subject.sink.add(DateTime.now()));
+        print('now: ${DateTime.now()}');
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text('ぱたぱた時計', style: TextStyle(fontSize: 32)),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
+              elevation: 0.8,
+              color: Colors.blueGrey,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: FlipWidget(subject: _subject, func: (dt) => dt.minute ~/ 10),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: FlipWidget(subject: _subject, func: (dt) => dt.minute % 10),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 50.0, left: 15.0),
+                    child: Text(
+                      '分',
+                      style: TextStyle(fontSize: 50),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
+              elevation: 0.8,
+              color: Colors.grey,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: FlipWidget(subject: _subject, func: (dt) => dt.second ~/ 10),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: FlipWidget(
+                        subject: _subject, func: (dt) => dt.second % 10),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 50.0, left: 20.0),
+                    child: Text(
+                      '秒',
+                      style: TextStyle(fontSize: 50),
+                    ),
+                  )
+                ],
+              ),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+typedef TResult Func<T, TResult>(T source);
+
+class FlipWidget extends StatefulWidget {
+  final Func<DateTime, int> func;
+  final PublishSubject<DateTime> subject;
+  FlipWidget({Key key, this.subject, this.func}) : super(key: key);
+
+  @override
+  _FlipWidgetState createState() => _FlipWidgetState();
+}
+
+class _FlipWidgetState extends State<FlipWidget>
+    with SingleTickerProviderStateMixin {
+  AnimationController _animationController;
+  Animation _halfTopFlipAnimation;
+  Animation _halfBottomFlipAnimation;
+  Stream<DateTime> stream;
+
+  Widget _child1;
+  Widget _backCard;
+  int _oldTime = 0;
+  int _newTime = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1000),
+    );
+
+    // 上半分の板を0からpi / 2.0まで回転させるAnimation
+    _halfTopFlipAnimation = Tween<double>(begin: 0.0, end: pi / 2.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Interval(0.0, 0.5, curve: Curves.linear),
+      ),
+    );
+
+    // 下半分の板を-pi / 2.0から0まで回転させるAnimation
+    _halfBottomFlipAnimation = Tween<double>(begin: 0.0, end: pi / 2.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Interval(0.5, 1.0, curve: Curves.linear),
+      ),
+    );
+
+    _child1 = _buildFlipCard('$_oldTime');
+    _backCard = _buildFlipCard('$_newTime');
+
+    // streamの設定
+    if (this.widget?.subject?.stream == null) {
+      print('stream is null');
+      return;
+    }
+
+    if (this.widget?.func == null) {
+      print('func is null');
+      return;
+    }
+
+    this
+        .widget
+        .subject
+        .stream
+        .where((dt) => this.widget.func(dt) != _newTime)
+        .listen(
+      (time) {
+        // print('stream is alive.');
+        setState(() {
+          _oldTime = _newTime;
+          _newTime = this.widget.func(time);
+          _child1 = _buildFlipCard('$_oldTime');
+          _backCard = _buildFlipCard('$_newTime');
+          _animationController.reset();
+          _animationController.forward();
+        });
+      },
+    );
+  }
+
+  Widget _buildFlipCard(String text) {
+    return Container(
+      color: Colors.yellow,
+      width: 90,
+      height: 130,
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(fontSize: 100, fontWeight: FontWeight.bold),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (BuildContext context, Widget widget) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Stack(
+              alignment: Alignment.topCenter,
+              children: <Widget>[
+                ClipRect(
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: _backCard,
+                    heightFactor: 0.5,
+                  ),
+                ),
+                Transform(
+                  transform: Matrix4.identity()
+                    ..setEntry(3, 2, 0.006)
+                    ..rotateX(_halfTopFlipAnimation.value),
+                  alignment: Alignment.bottomCenter,
+                  child: ClipRect(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      heightFactor: 0.5,
+                      child: _child1,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 2.0),
+            ),
+            Stack(
+              alignment: Alignment.topCenter,
+              children: <Widget>[
+                ClipRect(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    heightFactor: 0.5,
+                    child: _child1,
+                  ),
+                ),
+                Transform(
+                  transform: Matrix4.identity()
+                    ..setEntry(3, 2, 0.006)
+                    ..rotateX(-pi / 2.0 + _halfBottomFlipAnimation.value),
+                  alignment: Alignment.topCenter,
+                  child: ClipRect(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      heightFactor: 0.5,
+                      child: _backCard,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
