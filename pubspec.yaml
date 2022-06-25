@@ -18,15 +18,15 @@ dependencies:
 
 flutter_native_splash:
   color: "#add8e6"
-  image: "assets/images/splash.png"
+  image: "assets/images/food_cup_yakisoba_shippai.png"
   color_dark: "#262626"
-  image_dark: "assets/images/splash.png"
+  image_dark: "assets/images/food_cup_yakisoba_shippai.png"
   fullscreen: true
   android_12:
     icon_background_color: "#add8e6"
-    image: "assets/images/splash_android12.png"
+    image: "assets/images/food_cup_yakisoba_shippai.png"
     icon_background_color_dark: "#262626"
-    image_dark: "assets/images/splash_android12.png"
+    image_dark: "assets/images/food_cup_yakisoba_shippai.png"
   flutter_test:
     sdk: flutter
   flutter_lints: ^1.0.0
