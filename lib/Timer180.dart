@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-//import 'package:audioplayers/audioplayers.dart'; 
+import 'package:audioplayers/audioplayers.dart'; 
 
 void main() {
   runApp(const Timer180());
@@ -32,8 +32,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // AudioCache _player = AudioCache();
-  int _timer = 180;
+  static const FINISH = 'yukumo_0001.mp3';
+  final AudioCache _cache = AudioCache(
+    fixedPlayer: AudioPlayer(),
+  );
+  
+  int _timer = 3;
 
   @override
   void initState() {
@@ -48,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
         () {
           if (_timer < 1) {
             timer.cancel();
-            //_player.play('assets/yukumo_0001.mp3');
+            _cache.play(FINISH);
           } else {
             _timer = _timer - 1;
           }
