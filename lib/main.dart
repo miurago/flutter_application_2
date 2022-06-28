@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'Timer180.dart';
+
 
 void main() {
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -24,7 +28,30 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      //home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("ホーム"),
+      ),
+      body: Center(
+        child: TextButton(
+          child: Text("タイマースタート"),
+          onPressed: (){
+            // （1） 指定した画面に遷移する
+            Navigator.push(context, MaterialPageRoute(
+              // （2） 実際に表示するページ(ウィジェット)を指定する
+              builder:(context) => Timer180()));
+          },
+        ),
+      ),
     );
   }
 }
@@ -112,4 +139,5 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
 }
