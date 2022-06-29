@@ -39,7 +39,7 @@ class HomePage extends StatelessWidget{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("ホーム"),
+        title: Text("3分タイマー"),
       ),
       body: Center(
         child: TextButton(
