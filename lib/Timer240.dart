@@ -4,11 +4,11 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_application_2/main.dart';
 
 void main() {
-  runApp(const Timer180());
+  runApp(const Timer240());
 }
 
-class Timer180 extends StatelessWidget {
-  const Timer180({Key? key}) : super(key: key);
+class Timer240 extends StatelessWidget {
+  const Timer240({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
     fixedPlayer: AudioPlayer(),
   );
 
-  int _timer = 3;
+  int _timer = 4;
 
   @override
   void initState() {
@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("3分タイマー"),
+        title: Text("4分タイマー"),
       ),
       body: Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
